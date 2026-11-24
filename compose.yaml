@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: golfclub
+      POSTGRES_USER: golfclub
+      POSTGRES_PASSWORD: local-dev-password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U golfclub -d golfclub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/golfclub
+      SPRING_DATASOURCE_USERNAME: golfclub
+      SPRING_DATASOURCE_PASSWORD: local-dev-password
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_JPA_DDL_AUTO: update
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres-data:

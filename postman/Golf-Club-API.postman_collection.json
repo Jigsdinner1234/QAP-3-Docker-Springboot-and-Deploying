@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "Golf Club API",
+    "description": "Smoke-test requests for member, tournament, search, and registration endpoints. Run member and tournament creation first, then use their returned IDs in the registration request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "memberId", "value": "1" },
+    { "key": "tournamentId", "value": "1" },
+    { "key": "memberEmail", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "Add member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Morgan\",\n  \"address\": \"12 Course Road, Halifax, NS\",\n  \"email\": \"{{memberEmail}}\",\n  \"phoneNumber\": \"555-0100\",\n  \"membershipStartDate\": \"2026-07-21\",\n  \"membershipType\": \"ANNUAL\"\n}"
+            },
+            "url": "{{baseUrl}}/api/members"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.collectionVariables.set('memberEmail', 'alex-' + Date.now() + '@example.com');"]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.collectionVariables.set('memberId', pm.response.json().id.toString());"]
+              }
+            }
+          ]
+        },
+        { "name": "Get members", "request": { "method": "GET", "url": "{{baseUrl}}/api/members" } },
+        { "name": "Get member by ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/members/{{memberId}}" } },
+        { "name": "Search members by name", "request": { "method": "GET", "url": "{{baseUrl}}/api/members?name=alex" } },
+        { "name": "Search members by type", "request": { "method": "GET", "url": "{{baseUrl}}/api/members?membershipType=ANNUAL" } },
+        { "name": "Search members by phone", "request": { "method": "GET", "url": "{{baseUrl}}/api/members?phoneNumber=555-0100" } },
+        { "name": "Search members by tournament start date", "request": { "method": "GET", "url": "{{baseUrl}}/api/members?tournamentStartDate=2026-08-15" } }
+      ]
+    },
+    {
+      "name": "Tournaments",
+      "item": [
+        {
+          "name": "Add tournament",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2026-08-15\",\n  \"endDate\": \"2026-08-16\",\n  \"location\": \"Halifax Golf Club\",\n  \"entryFee\": 75.00,\n  \"cashPrizeAmount\": 1000.00\n}"
+            },
+            "url": "{{baseUrl}}/api/tournaments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.collectionVariables.set('tournamentId', pm.response.json().id.toString());"]
+              }
+            }
+          ]
+        },
+        { "name": "Get tournaments", "request": { "method": "GET", "url": "{{baseUrl}}/api/tournaments" } },
+        { "name": "Get tournament by ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/tournaments/{{tournamentId}}" } },
+        { "name": "Search tournaments by start date", "request": { "method": "GET", "url": "{{baseUrl}}/api/tournaments?startDate=2026-08-15" } },
+        { "name": "Search tournaments by location", "request": { "method": "GET", "url": "{{baseUrl}}/api/tournaments?location=halifax" } },
+        { "name": "Register member", "request": { "method": "POST", "url": "{{baseUrl}}/api/tournaments/{{tournamentId}}/members/{{memberId}}" } }
+      ]
+    }
+  ]
+}
